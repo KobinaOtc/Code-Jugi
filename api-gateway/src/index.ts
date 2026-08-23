@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import problemRoutes from './routes/problem.routes';
 import { initSocket } from './services/socket.service'; // <-- Import our new service
+import { initWorker } from './services/worker.service';
 import submissionRoutes from './routes/submission.routes';
 
 // Load environment variables
@@ -33,10 +34,13 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Initialize WebSockets first, THEN start listening for HTTP traffic
+// Initialize WebSockets, THEN start listening, THEN start the worker
 initSocket(server).then(() => {
   server.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    
+    // Start the background worker!
+    initWorker(); 
   });
 }).catch((err) => {
   console.error('Failed to initialize WebSockets:', err);
