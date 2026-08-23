@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import problemRoutes from './routes/problem.routes';
 import { initSocket } from './services/socket.service'; // <-- Import our new service
+import submissionRoutes from './routes/submission.routes';
 
 // Load environment variables
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(express.json());
 
 // Mount Routes
 app.use('/api/v1/problems', problemRoutes);
+app.use('/api/v1/submissions', submissionRoutes);
 
 // Basic Health Check Route
 app.get('/health', (req, res) => {
