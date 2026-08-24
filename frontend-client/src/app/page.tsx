@@ -20,6 +20,19 @@ export default function Workspace() {
       console.log("Connected to WebSocket Server:", socketInstance.id);
     });
 
+    // 📢 NEW: Listen for the broadcast from the Worker
+    socketInstance.on("submission_update", (data) => {
+      console.log("Received update:", data);
+      
+      if (data.status === 'ACCEPTED') {
+        setStatus(`✅ ACCEPTED (Time: ${data.executionTimeMs}ms)`);
+      } else if (data.status === 'WRONG_ANSWER') {
+        setStatus(`❌ WRONG ANSWER`);
+      } else {
+        setStatus(`⚠️ ERROR: ${data.errorMessage}`);
+      }
+    });
+
     // Cleanup on unmount
     return () => {
       socketInstance.disconnect();
@@ -30,15 +43,33 @@ export default function Workspace() {
     if (value) setCode(value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setStatus("Submitting code...");
-    // Mocking a submission ID for now. 
-    // In Phase 2, this ID will come from the Express API response.
-    const mockSubmissionId = "sub_12345"; 
     
-    if (socket) {
-      socket.emit("subscribe_submission", mockSubmissionId);
-      setStatus(`Subscribed to updates for: ${mockSubmissionId}`);
+    try {
+      // 1. Send the code to the Express API (The Cashier)
+      const response = await fetch("http://localhost:5001/api/v1/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemId: "6a8b53f8cfccc393bc927c93", // Hardcoded for now until you add problem selection
+          userId: "user_123", // Hardcoded for now until you add auth
+          language: "javascript",
+          code: code,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const newSubmissionId = result.data.submissionId;
+        setStatus(`Code queued. Waiting for worker... (ID: ${newSubmissionId})`);
+        
+        // 2. Tune the walkie-talkie to this specific submission's channel
+        socket?.emit("subscribe_submission", newSubmissionId);
+      }
+    } catch (error) {
+      setStatus("Failed to connect to API Gateway.");
     }
   };
 
