@@ -12,7 +12,7 @@ export default function Workspace() {
   // Initialize WebSocket connection to the API Gateway
   useEffect(() => {
     // Ensure this matches the port your backend is currently running on (5001)
-    const socketInstance = io("http://localhost:5001");
+    const socketInstance = io("https://code-jugi.onrender.com");
     
     setSocket(socketInstance);
 
@@ -48,7 +48,7 @@ export default function Workspace() {
     
     try {
       // 1. Send the code to the Express API (The Cashier)
-      const response = await fetch("http://localhost:5001/api/v1/submissions", {
+      const response = await fetch("https://code-jugi.onrender.com/api/v1/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
