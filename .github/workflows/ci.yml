@@ -1,0 +1,40 @@
+name: Code-Jugi CI Pipeline
+
+# 1. When should this run? Every time you push to the 'main' branch.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# 2. What jobs should it do?
+jobs:
+  build-and-test:
+    # GitHub gives you a free Ubuntu Linux server to run this on
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step A: Download your repository code onto the GitHub server
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step B: Install Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # Step C: Install your backend dependencies cleanly
+    - name: Install API Dependencies
+      working-directory: ./api-gateway
+      run: npm install
+
+    # Step D: Verify TypeScript compiles without errors
+    - name: Build API TypeScript
+      working-directory: ./api-gateway
+      run: npm run build
+
+    # Step E: Verify the Dockerfile works
+    - name: Test Docker Build
+      working-directory: ./api-gateway
+      run: docker build -t code-jugi-api:test .
