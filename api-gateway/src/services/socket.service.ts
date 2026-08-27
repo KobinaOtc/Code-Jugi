@@ -1,7 +1,11 @@
 import { Server as SocketIOServer } from 'socket.io';
+import dotenv from 'dotenv';
 import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Server as HttpServer } from 'http';
+
+// Load environment variables
+dotenv.config();
 
 export const initSocket = async (httpServer: HttpServer) => {
   // 1. Initialize Socket.io with CORS
